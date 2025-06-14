@@ -1,0 +1,3 @@
+[workspace]
+resolver = "3"
+members = ["iv2c", "iv2cli", "iv2c_rest"]
