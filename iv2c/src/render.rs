@@ -125,6 +125,8 @@ pub struct RenderOptions {
     pub fps: f64,
     /// The width modifier (use 2 for emojis).
     pub w_mod: u32,
+    /// loop back to the first frame after iterating through frames.
+    pub loop_playback: bool,
 }
 
 impl Renderer {
@@ -149,9 +151,6 @@ impl Renderer {
         let mut time_count = std::time::Instant::now();
         let mut should_continue = true;
 
-        // Ensure first frame is drawn immediately
-        time_count -= self.target_frame_duration();
-
         while should_continue {
             let (should_process_frame, frames_to_skip) = self.should_process_frame(&mut time_count);
             let frame = if should_process_frame {
@@ -159,6 +158,14 @@ impl Renderer {
                     self.media.skip_frames(frames_to_skip);
                 }
                 let f = self.get_current_frame();
+
+                if self.render_options.loop_playback && f.is_none() {
+                    // make sure the first frame on replay is shown immediately
+                    time_count -= self.target_frame_duration();
+                    // replay
+                    self.replay_pipeline();
+                }
+
                 self.render_current_frame(f.as_ref())
             } else {
                 None
@@ -182,6 +189,10 @@ impl Renderer {
         } else {
             (false, 0)
         }
+    }
+
+    fn replay_pipeline(&mut self) {
+        self.media.reset();
     }
 
     fn time_to_send_next_frame(&self, time_count: &mut std::time::Instant) -> (bool, usize) {

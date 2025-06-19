@@ -25,7 +25,7 @@ struct Args {
     fps: Option<String>,
     /// Loop playing of video/gif
     #[arg(short, long, default_value_t = false)]
-    loop_playback: bool,
+    r#loop: bool,
     /// Custom lookup char table
     #[arg(short, long)]
     char_map: Option<String>,
@@ -69,7 +69,7 @@ fn main() -> Result<(), Error> {
     }
 }
 
-fn export(args: Args, media_data: MediaData) -> Result<(), Error> {
+fn export(_args: Args, _media_data: MediaData) -> Result<(), Error> {
     Ok(())
 }
 
@@ -99,12 +99,15 @@ fn play(args: Args, media_data: MediaData) -> Result<(), Error> {
     let w_mod = args.w_mod;
     let allow_frame_skip = args.allow_frame_skip;
     let new_lines = args.new_lines;
+    let loop_playback = args.r#loop;
+
     let mut renderer = iv2c::render::Renderer::new(
         ImagePipeline::new(Resolution::Fixed(width, height), cmaps, new_lines),
         media,
         RenderOptions {
             fps: use_fps,
             w_mod,
+            loop_playback,
         },
     );
 
